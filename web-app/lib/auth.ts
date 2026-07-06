@@ -51,6 +51,8 @@ export async function signUpWithEmail(email: string, password: string) {
     return data;
 }
 
+
+// clears the session and removes the JWT token from local storage, effectively logging the user out.
 export async function signOut() {
     const supabase = getSupabaseClient();
 
