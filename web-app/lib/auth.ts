@@ -6,28 +6,34 @@ import { getSupabaseClient } from "@/lib/supabaseClient";
 
 export async function signInWithEmail(email: string, password: string) {
     const supabase = getSupabaseClient();
-
     if (!supabase) {
         throw new Error("Supabase is not configured.");
     }
 
-    // user enters email and password and Supabase validates the credentials against the database. 
-    // If valid, it creates a session
-    // and returns a JWT token if successful, or an error if not. 
-    // The JWT token is then stored in the browser's local storage for future requests.
     const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
     });
-
     if (error) {
+        await handleAuthError(error);
         throw error;
     }
-
+    
+    // Guard: don't treat a session-less response as success
+    if (!data?.user || !data?.session) {
+        throw new Error("Sign in failed: no session returned.");
+    }
     return data;
+
 }
 
-
+export async function handleAuthError(error: unknown) {
+    const message = error instanceof Error ? error.message : "";
+    if (message.includes("Refresh Token")) {
+        const supabase = getSupabaseClient();
+        await supabase?.auth.signOut(); // clears storage, fires SIGNED_OUT
+    }
+}
 //creates user in auth.users
 // hashes password internally
 // may send email verification (depending config)

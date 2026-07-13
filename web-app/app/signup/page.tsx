@@ -17,26 +17,36 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
+        setError("Passwords do not match.");
+        return;
     }
 
     setLoading(true);
 
     try {
-      await signUpWithEmail(email, password);
-      router.push("/");
+        const { session } = await signUpWithEmail(email, password);
+
+        if (session) {
+            // Confirmation disabled — user is logged in immediately
+            router.push("/");
+            return;
+        }
+
+        // Confirmation required — no session yet
+        router.push("/check-email"); // or setMessage("Check your email to confirm your account.")
+        return;
     } catch (err) {
-      setError(getAuthErrorMessage(err));
-    } finally {
-      setLoading(false);
+      
+        setError(getAuthErrorMessage(err));
     }
-  }
+
+    setLoading(false);
+}
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background p-6">

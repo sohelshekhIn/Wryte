@@ -1,29 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getSession, signOut } from "@/lib/auth";
+import { signOut } from "@/lib/auth";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Home() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadSession() {
-      const session = await getSession();
-      setIsLoggedIn(Boolean(session));
-      setLoading(false);
-    }
-
-    loadSession();
-  }, []);
-
-  async function handleLogout() {
-    await signOut();
-    setIsLoggedIn(false);
-  }
+  const { session, loading } = useAuth();
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background p-6">
@@ -35,10 +19,10 @@ export default function Home() {
         <CardContent className="space-y-6">
           {loading ? (
             <p className="text-sm text-muted-foreground">Checking session...</p>
-          ) : isLoggedIn ? (
+          ) : session ? (
             <div className="space-y-4">
               <p className="text-lg font-medium">You are logged in</p>
-              <Button onClick={handleLogout}>Log out</Button>
+              <Button onClick={() => signOut()}>Log out</Button>
             </div>
           ) : (
             <div className="flex flex-col gap-3 sm:flex-row">

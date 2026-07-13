@@ -16,20 +16,21 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setError(null);
 
     try {
-      await signInWithEmail(email, password);
-      router.push("/");
+        await signInWithEmail(email, password);
+        router.push("/"); // only reachable with a validated session
+        return; // navigating away — skip setLoading below
     } catch (err) {
-      setError(getAuthErrorMessage(err));
-    } finally {
-      setLoading(false);
+        setError(getAuthErrorMessage(err));
     }
-  }
+
+    setLoading(false);
+}
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background p-6">
