@@ -2,14 +2,64 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/*
+  Token rule:
+  - App chrome and components use shadcn semantic tokens
+    (background, foreground, primary, muted, card, border, ...).
+  - Raw brand scales (sage-*, ink-*, olive-*, terracotta-*) are for brand
+    flourishes only: book covers, logo marks, manuscript typography accents.
+  When in doubt, use the semantic token.
+*/
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Wryte base scales as Tailwind utilities (bg-sage-500, text-ink-900, …) */
+  --color-sage-50: var(--sage-50);
+  --color-sage-100: var(--sage-100);
+  --color-sage-150: var(--sage-150);
+  --color-sage-200: var(--sage-200);
+  --color-sage-300: var(--sage-300);
+  --color-sage-400: var(--sage-400);
+  --color-sage-500: var(--sage-500);
+  --color-sage-600: var(--sage-600);
+  --color-sage-700: var(--sage-700);
+  --color-sage-800: var(--sage-800);
+  --color-sage-900: var(--sage-900);
+  --color-sage-950: var(--sage-950);
+  --color-olive-400: var(--olive-400);
+  --color-olive-500: var(--olive-500);
+  --color-olive-600: var(--olive-600);
+  --color-ink-50: var(--ink-50);
+  --color-ink-100: var(--ink-100);
+  --color-ink-200: var(--ink-200);
+  --color-ink-300: var(--ink-300);
+  --color-ink-400: var(--ink-400);
+  --color-ink-500: var(--ink-500);
+  --color-ink-600: var(--ink-600);
+  --color-ink-700: var(--ink-700);
+  --color-ink-800: var(--ink-800);
+  --color-ink-900: var(--ink-900);
+  --color-ink-950: var(--ink-950);
+  --color-terracotta-100: var(--terracotta-100);
+  --color-terracotta-400: var(--terracotta-400);
+  --color-terracotta-500: var(--terracotta-500);
+  --color-terracotta-600: var(--terracotta-600);
+
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-foreground: var(--warning-foreground);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+
+  /* Fonts - wired to next/font variables in app/layout.tsx */
+  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-lora), ui-serif, Georgia, serif;
+  --font-mono:
+    var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-heading: var(--font-serif);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -39,82 +89,104 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Wryte radius scale - fixed values from the design system, not calc(--radius) */
+  --radius-sm: 0.375rem; /* 6px  - chips, small controls */
+  --radius-md: 0.625rem; /* 10px - inputs, small cards */
+  --radius-lg: 1rem; /* 16px - buttons, panels */
+  --radius-xl: 1.375rem; /* 22px - modals, large cards */
+  --radius-2xl: 1.75rem; /* 28px - hero panels */
+  --radius-3xl: 2rem;
+  --radius-4xl: 2.5rem;
+
+  /* Soft, warm-tinted shadows */
+  --shadow-2xs: 0 1px 2px 0 rgba(43, 56, 32, 0.05);
+  --shadow-xs: 0 1px 2px 0 rgba(43, 56, 32, 0.06);
+  --shadow-sm:
+    0 1px 3px 0 rgba(43, 56, 32, 0.08), 0 1px 2px -1px rgba(43, 56, 32, 0.06);
+  --shadow-md:
+    0 4px 10px -2px rgba(43, 56, 32, 0.1), 0 2px 6px -2px rgba(43, 56, 32, 0.06);
+  --shadow-lg:
+    0 12px 24px -6px rgba(43, 56, 32, 0.14),
+    0 4px 10px -4px rgba(43, 56, 32, 0.08);
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
+  /* ---- Wryte base scale: Sage (brand green) ---- */
+  --sage-50: #f6f4f1;
+  --sage-100: #ecf0e6;
+  --sage-150: #dae3d4;
+  --sage-200: #c7d7bc;
+  --sage-300: #b1c8a1;
+  --sage-400: #9ab884;
+  --sage-500: #80a566;
+  --sage-600: #6b8f53;
+  --sage-700: #556f40;
+  --sage-800: #40532f;
+  --sage-900: #2c3820;
+  --sage-950: #1c2415;
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* ---- Olive (muted secondary green) ---- */
+  --olive-400: #8b9280;
+  --olive-500: #737a69;
+  --olive-600: #5d6355;
+
+  /* ---- Ink (warm neutral, text) ---- */
+  --ink-950: #1e2118;
+  --ink-900: #2a2e23;
+  --ink-800: #383d30;
+  --ink-700: #4a5040;
+  --ink-600: #5e6553;
+  --ink-500: #767c6b;
+  --ink-400: #93987f;
+  --ink-300: #acb19e;
+  --ink-200: #c9cdbf;
+  --ink-100: #dfe2d7;
+  --ink-50: #f0f1eb;
+
+  /* ---- Terracotta (accent / destructive) ---- */
+  --terracotta-100: #f3ded6;
+  --terracotta-400: #c36b4f;
+  --terracotta-500: #b4553f;
+  --terracotta-600: #954433;
+
+  --warning: #c79a3e;
+  --warning-soft: #f3e9d2;
+  --warning-foreground: #7a5c22;
+
+  /* ---- shadcn semantics mapped to Wryte ---- */
+  --background: var(--sage-50);
+  --foreground: var(--ink-900);
+  --card: #ffffff;
+  --card-foreground: var(--ink-900);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink-900);
+  --primary: var(--sage-500);
+  --primary-foreground: #ffffff;
+  --secondary: var(--sage-150);
+  --secondary-foreground: var(--sage-900);
+  --muted: var(--sage-100);
+  --muted-foreground: var(--ink-600);
+  --accent: var(--sage-150);
+  --accent-foreground: var(--sage-800);
+  --destructive: var(--terracotta-500);
+  --border: var(--ink-100);
+  --input: var(--ink-200);
+  --ring: var(--sage-400);
+  --chart-1: var(--sage-500);
+  --chart-2: var(--sage-300);
+  --chart-3: var(--olive-500);
+  --chart-4: var(--sage-700);
+  --chart-5: var(--terracotta-400);
+  --radius: 0.625rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: var(--ink-900);
+  --sidebar-primary: var(--sage-500);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--sage-150);
+  --sidebar-accent-foreground: var(--sage-800);
+  --sidebar-border: var(--ink-100);
+  --sidebar-ring: var(--sage-400);
 }
 
 @layer base {
