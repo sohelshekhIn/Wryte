@@ -14,14 +14,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  // No client → never loading; avoids setState-in-effect when Supabase is unset.
+  const [loading, setLoading] = useState(() => !!getSupabaseClient());
 
   useEffect(() => {
     const supabase = getSupabaseClient();
-    if (!supabase) {
-      setLoading(false);
-      return;
-    }
+    if (!supabase) return;
 
     // Primary source of truth — fires INITIAL_SESSION on mount,
     // then SIGNED_IN / SIGNED_OUT / TOKEN_REFRESHED as they happen.
