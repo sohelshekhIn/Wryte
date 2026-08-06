@@ -1,10 +1,15 @@
+from .enums import BookStatus, CoverTone, MessageRole
+from .Writer import Writer
 from .Book import Book
+from .Chapter import Chapter
+from .Scene import Scene
+from .ChatMessage import ChatMessage
 
 # This file is intentionally left empty to make the "models" directory a package.
 
 # Benefits explained:
 
-# without __init__.py, you cannot import models as a package. 
+# without __init__.py, you cannot import models as a package.
 
 # Without this file you'll have to do this:
 # from app.models.Book import Book
