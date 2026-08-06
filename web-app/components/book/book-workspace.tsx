@@ -6,18 +6,25 @@ import { BrainstormPanel } from "@/components/book/brainstorm-panel"
 import { ManuscriptEditor } from "@/components/book/manuscript-editor"
 import { Sidebar } from "@/components/book/sidebar"
 import { TopBar } from "@/components/book/top-bar"
-import { countWords, findScene } from "@/lib/mock/book"
+import { countWords, findScene } from "@/lib/book-utils"
 import type { Book } from "@/types/book"
 
 export function BookWorkspace({ book }: { book: Book }) {
-  const [activeSceneId, setActiveSceneId] = useState(
-    book.chapters[0].scenes[0].id,
-  )
-  // Local unsaved edits keyed by scene id; the mock book stays untouched.
+  const firstSceneId = book.chapters[0]?.scenes[0]?.id ?? ""
+  const [activeSceneId, setActiveSceneId] = useState(firstSceneId)
+  // Local unsaved edits keyed by scene id; not persisted yet.
   const [drafts, setDrafts] = useState<Record<string, string>>({})
 
-  // activeSceneId only ever holds ids that exist on this book.
-  const { chapterNumber, chapter, scene } = findScene(book, activeSceneId)!
+  const found = findScene(book, activeSceneId)
+  if (!found) {
+    return (
+      <div className="flex h-full items-center justify-center text-muted-foreground">
+        This book has no scenes yet.
+      </div>
+    )
+  }
+
+  const { chapterNumber, chapter, scene } = found
   const body = drafts[scene.id] ?? scene.body
 
   const wordCount = book.chapters
@@ -39,7 +46,7 @@ export function BookWorkspace({ book }: { book: Book }) {
           value={body}
           onChange={(value) => setDrafts((d) => ({ ...d, [scene.id]: value }))}
         />
-        <BrainstormPanel />
+        <BrainstormPanel bookId={book.id} />
       </div>
     </div>
   )

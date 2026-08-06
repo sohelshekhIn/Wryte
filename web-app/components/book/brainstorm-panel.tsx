@@ -1,26 +1,47 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { BRAINSTORM_MESSAGES } from "@/lib/mock/book"
+import { createBookMessage, getBookMessages } from "@/lib/api/client"
+import { mapChatMessage } from "@/lib/api/mappers"
 import type { ChatMessage } from "@/types/book"
 
-export function BrainstormPanel() {
-  const [messages, setMessages] = useState<ChatMessage[]>(BRAINSTORM_MESSAGES)
+export function BrainstormPanel({ bookId }: { bookId: string }) {
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
+  const [sending, setSending] = useState(false)
 
-  // ponytail: no AI backend yet — Send only appends the user's message
-  // locally. Upgrade path: POST to an API route and stream the reply.
-  function send() {
+  useEffect(() => {
+    let cancelled = false
+    void getBookMessages(bookId)
+      .then((rows) => {
+        if (!cancelled) setMessages(rows.map(mapChatMessage))
+      })
+      .catch(() => {
+        if (!cancelled) setMessages([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [bookId])
+
+  // ponytail: no AI backend yet — Send persists the user message only.
+  // Upgrade path: stream an assistant reply after POST.
+  async function send() {
     const content = input.trim()
-    if (!content) return
-    setMessages((m) => [
-      ...m,
-      { id: crypto.randomUUID(), role: "user", content },
-    ])
+    if (!content || sending) return
+    setSending(true)
     setInput("")
+    try {
+      const saved = await createBookMessage(bookId, { role: "user", content })
+      setMessages((m) => [...m, mapChatMessage(saved)])
+    } catch {
+      setInput(content)
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -52,7 +73,7 @@ export function BrainstormPanel() {
         className="flex flex-col gap-2 border-t p-3"
         onSubmit={(e) => {
           e.preventDefault()
-          send()
+          void send()
         }}
       >
         <Textarea
@@ -63,7 +84,7 @@ export function BrainstormPanel() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
-        <Button type="submit" size="sm">
+        <Button type="submit" size="sm" disabled={sending}>
           Send
         </Button>
       </form>

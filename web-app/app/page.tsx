@@ -11,7 +11,9 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { BOOKS, WRITER, bookWordCount } from "@/lib/mock/book"
+import { getBooks, getWriters } from "@/lib/api/client"
+import { mapBook, mapWriter } from "@/lib/api/mappers"
+import { bookWordCount } from "@/lib/book-utils"
 import type { CoverTone } from "@/types/book"
 
 const COVER_CLASSES: Record<CoverTone, string> = {
@@ -70,8 +72,14 @@ function Stat({ value, label }: { value: string; label: string }) {
   )
 }
 
-export default function Dashboard() {
-  const totalWords = BOOKS.reduce((sum, b) => sum + bookWordCount(b), 0)
+export default async function Dashboard() {
+  const [apiBooks, apiWriters] = await Promise.all([getBooks(), getWriters()])
+  const books = apiBooks.map(mapBook)
+  const writer = apiWriters[0] ? mapWriter(apiWriters[0]) : null
+  const writerName = writer?.name ?? "Writer"
+  const dayStreak = writer?.dayStreak ?? 0
+  const totalWords = books.reduce((sum, b) => sum + bookWordCount(b), 0)
+  const firstBookId = books[0]?.id
 
   return (
     <div className="flex h-full">
@@ -80,7 +88,7 @@ export default function Dashboard() {
         <div className="mb-10 flex items-center justify-between">
           <div>
             <h1 className="mb-1.5 font-serif text-[2rem] leading-[1.22] font-semibold text-ink-950">
-              Good evening, {WRITER.name}
+              Good evening, {writerName}
             </h1>
             <p className="text-sm text-muted-foreground">
               The page is quiet. Let&apos;s fill it.
@@ -88,14 +96,20 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-9">
             <Stat value={formatCount(totalWords)} label="words written" />
-            <Stat value={String(WRITER.dayStreak)} label="day streak" />
-            <Button asChild className="h-10 px-5">
-              <Link href={`/book/${BOOKS[0].id}`}>New book</Link>
-            </Button>
+            <Stat value={String(dayStreak)} label="day streak" />
+            {firstBookId ? (
+              <Button asChild className="h-10 px-5">
+                <Link href={`/book/${firstBookId}`}>New book</Link>
+              </Button>
+            ) : (
+              <Button className="h-10 px-5" disabled>
+                New book
+              </Button>
+            )}
           </div>
         </div>
         <div className="grid grid-cols-3 gap-6">
-          {BOOKS.map((b) => (
+          {books.map((b) => (
             <Link key={b.id} href={`/book/${b.id}`}>
               <Card className="gap-2.5 rounded-2xl p-4 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md">
                 <div
@@ -119,7 +133,7 @@ export default function Dashboard() {
                   </Badge>
                 </div>
                 <div className="-mt-1 text-[13px] text-muted-foreground">
-                  {b.genre} · {b.chapters.length} chapters ·{" "}
+                  {b.genre} · {b.chapterCount ?? b.chapters.length} chapters ·{" "}
                   {formatCount(bookWordCount(b))} words
                 </div>
                 <div

@@ -1,8 +1,12 @@
 import { redirect } from "next/navigation"
 
-import { BOOKS } from "@/lib/mock/book"
+import { getBooks } from "@/lib/api/client"
 
 // Legacy entry point — the workspace lives at /book/[id].
-export default function BookIndexPage() {
-  redirect(`/book/${BOOKS[0].id}`)
+export default async function BookIndexPage() {
+  const books = await getBooks()
+  if (books.length === 0) {
+    redirect("/")
+  }
+  redirect(`/book/${books[0].id}`)
 }

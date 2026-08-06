@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation"
 
 import { BookWorkspace } from "@/components/book/book-workspace"
-import { getBook } from "@/lib/mock/book"
+import { ApiError, getBook } from "@/lib/api/client"
+import { mapBook } from "@/lib/api/mappers"
 
 export default async function BookPage({
   params,
@@ -9,8 +10,16 @@ export default async function BookPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const book = getBook(id)
-  if (!book) notFound()
+
+  let book
+  try {
+    book = mapBook(await getBook(id))
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) {
+      notFound()
+    }
+    throw error
+  }
 
   return <BookWorkspace book={book} />
 }
