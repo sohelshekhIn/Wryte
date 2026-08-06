@@ -23,6 +23,9 @@ class BookResponse(BaseModel):
     progress: float
     cover_tone: CoverTone
     writer_id: int | None = None
+    # derived at request time, not stored columns
+    word_count: int = 0
+    chapter_count: int = 0
 
     class Config:
         from_attributes = True
@@ -30,5 +33,3 @@ class BookResponse(BaseModel):
 
 class BookDetailResponse(BookResponse):
     chapters: list[ChapterDetailResponse] = []
-    # derived from scene bodies at request time, not a stored column
-    word_count: int = 0

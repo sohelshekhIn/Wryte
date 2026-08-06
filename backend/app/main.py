@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.database import engine, Base 
 # engine is the connection bridge to the database, Base is the base class for all models (SQLAlchemy registry for all models)
@@ -12,6 +13,7 @@ from app.routes.writers import router as writers_router
 from app.routes.chapters import router as chapters_router
 from app.routes.scenes import router as scenes_router
 from app.routes.chat_messages import router as chat_messages_router
+from app.routes.seed import router as seed_router
 #this loads the router for the books endpoints, which we will register with the FastAPI app below.
 
 app = FastAPI(
@@ -20,12 +22,25 @@ app = FastAPI(
     version="1.0.0"
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Register API routes
 app.include_router(books_router)
 app.include_router(writers_router)
 app.include_router(chapters_router)
 app.include_router(scenes_router)
 app.include_router(chat_messages_router)
+app.include_router(seed_router)
+
 
 # TEMP: auto-create tables (development only)
 # We will replace this with Alembic migrations later.
