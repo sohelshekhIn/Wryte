@@ -13,42 +13,15 @@ export default function AuthCallbackPage() {
   const supabase = getSupabaseClient()
   const [error, setError] = useState<string | null>(null)
 
-  // Wait for Supabase to expose the OAuth session and then redirect the user back into the app.
   useEffect(() => {
     if (!supabase) {
       return
     }
 
+    const client = supabase
     let active = true
 
-    function finishSignIn() {
-      router.replace("/")
-      router.refresh()
-    }
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (active && session) {
-        finishSignIn()
-      }
-    })
-
-    void supabase.auth.getSession().then(({ data, error: sessionError }) => {
-      if (!active) {
-        return
-      }
-
-      if (sessionError) {
-        setError("Google sign-in could not be completed. Please try again.")
-        return
-      }
-
-      if (data.session) {
-        finishSignIn()
-        return
-      }
-
+    async function finishAuthentication() {
       const searchParameters = new URLSearchParams(window.location.search)
       const hashParameters = new URLSearchParams(
         window.location.hash.replace(/^#/, ""),
@@ -57,16 +30,84 @@ export default function AuthCallbackPage() {
       const oauthError =
         searchParameters.get("error") ?? hashParameters.get("error")
 
-      setError(
-        oauthError
-          ? "Google sign-in was cancelled or could not be completed."
-          : "No authentication session was returned. Please try again.",
-      )
-    })
+      if (oauthError) {
+        window.history.replaceState({}, "", window.location.pathname)
+
+        if (active) {
+          setError("Google sign-in was cancelled or could not be completed.")
+        }
+
+        return
+      }
+
+      const authorizationCode = searchParameters.get("code")
+      const accessToken = hashParameters.get("access_token")
+      const refreshToken = hashParameters.get("refresh_token")
+
+      if (authorizationCode) {
+        window.history.replaceState({}, "", window.location.pathname)
+
+        const { error: exchangeError } =
+          await client.auth.exchangeCodeForSession(authorizationCode)
+
+        if (!active) {
+          return
+        }
+
+        if (exchangeError) {
+          setError("Google sign-in could not be completed. Please try again.")
+          return
+        }
+
+        router.replace("/")
+        router.refresh()
+        return
+      }
+
+      if (accessToken && refreshToken) {
+        window.history.replaceState({}, "", window.location.pathname)
+
+        const { error: sessionError } = await client.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        })
+
+        if (!active) {
+          return
+        }
+
+        if (sessionError) {
+          setError("Google sign-in could not be completed. Please try again.")
+          return
+        }
+
+        router.replace("/")
+        router.refresh()
+        return
+      }
+
+      const {
+        data: { session },
+        error: sessionError,
+      } = await client.auth.getSession()
+
+      if (!active) {
+        return
+      }
+
+      if (sessionError || !session) {
+        setError("No authentication session was returned. Please try again.")
+        return
+      }
+
+      router.replace("/")
+      router.refresh()
+    }
+
+    void finishAuthentication()
 
     return () => {
       active = false
-      subscription.unsubscribe()
     }
   }, [router, supabase])
 
