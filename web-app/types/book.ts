@@ -24,6 +24,9 @@ export type Book = {
   progress: number
   coverTone: CoverTone
   chapters: Chapter[]
+  /** Present on list responses; detail can recompute from scenes */
+  wordCount?: number
+  chapterCount?: number
 }
 
 export type ChatMessage = {
